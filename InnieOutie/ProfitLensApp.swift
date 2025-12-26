@@ -12,6 +12,7 @@ import SwiftUI
 struct InnieOutieApp: App {
     @StateObject private var authService = AuthenticationService()
     @StateObject private var paywallService = PaywallService()
+    @StateObject private var appearanceManager = AppearanceManager()
     @AppStorage("has_onboarded") private var hasOnboarded = false
 
     var body: some Scene {
@@ -23,11 +24,13 @@ struct InnieOutieApp: App {
                     MainTabView()
                         .environmentObject(authService)
                         .environmentObject(paywallService)
+                        .environmentObject(appearanceManager)
                 } else {
                     AuthenticationView()
                         .environmentObject(authService)
                 }
             }
+            .preferredColorScheme(appearanceManager.selectedMode.colorScheme)
             .onAppear {
                 // Initialize services
                 Task {

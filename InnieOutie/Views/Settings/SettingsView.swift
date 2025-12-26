@@ -10,12 +10,27 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var authService: AuthenticationService
     @EnvironmentObject var paywallService: PaywallService
+    @EnvironmentObject var appearanceManager: AppearanceManager
 
     @State private var showSignOutAlert = false
 
     var body: some View {
         NavigationView {
             List {
+                // Appearance Section
+                Section {
+                    Picker("Theme", selection: $appearanceManager.selectedMode) {
+                        ForEach(AppearanceMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("Appearance")
+                } footer: {
+                    Text("Choose your preferred color theme")
+                }
+
                 // Pro Status Section
                 Section {
                     if paywallService.isPro {
@@ -206,4 +221,5 @@ struct ManageCategoriesView: View {
     SettingsView()
         .environmentObject(AuthenticationService())
         .environmentObject(PaywallService())
+        .environmentObject(AppearanceManager())
 }
