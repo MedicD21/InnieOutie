@@ -202,16 +202,249 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Manage Categories (Stub)
+// MARK: - Manage Categories & Tags
 
 struct ManageCategoriesView: View {
+    @StateObject private var dataService = DataService()
+    @State private var showAddCategory = false
+    @State private var showAddTag = false
+    @State private var newCategoryName = ""
+    @State private var newCategoryIcon = "folder"
+    @State private var newTagName = ""
+    @State private var newTagColor: TagColor = .blue
+
     var body: some View {
         List {
-            Text("Category management coming soon")
-                .foregroundColor(.secondary)
+            // Categories Section
+            Section {
+                ForEach(dataService.categories) { category in
+                    HStack {
+                        Image(systemName: category.icon)
+                            .foregroundColor(.blue)
+                            .frame(width: 30)
+
+                        Text(category.name)
+
+                        Spacer()
+
+                        if category.isDefault {
+                            Text("Default")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .onDelete { indexSet in
+                    indexSet.forEach { index in
+                        let category = dataService.categories[index]
+                        if !category.isDefault {
+                            dataService.deleteCategory(category)
+                        }
+                    }
+                }
+
+                Button(action: { showAddCategory = true }) {
+                    Label("Add Category", systemImage: "plus.circle.fill")
+                }
+            } header: {
+                Text("Expense Categories")
+            } footer: {
+                Text("Organize expenses by type (e.g., Software, Travel)")
+            }
+
+            // Tags Section
+            Section {
+                ForEach(dataService.tags) { tag in
+                    HStack {
+                        Image(systemName: tag.color.icon)
+                            .foregroundColor(tag.color.color)
+                            .frame(width: 30)
+
+                        Text(tag.name)
+
+                        Spacer()
+                    }
+                }
+                .onDelete { indexSet in
+                    indexSet.forEach { index in
+                        let tag = dataService.tags[index]
+                        dataService.deleteTag(tag)
+                    }
+                }
+
+                Button(action: { showAddTag = true }) {
+                    Label("Add Tag", systemImage: "plus.circle.fill")
+                }
+            } header: {
+                Text("Project/Client Tags")
+            } footer: {
+                Text("Track work by project or client")
+            }
         }
-        .navigationTitle("Categories")
+        .navigationTitle("Categories & Tags")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showAddCategory) {
+            AddCategorySheet(
+                categoryName: $newCategoryName,
+                categoryIcon: $newCategoryIcon,
+                onSave: {
+                    let category = Category(
+                        name: newCategoryName,
+                        icon: newCategoryIcon,
+                        sortOrder: dataService.categories.count
+                    )
+                    dataService.saveCategory(category)
+                    newCategoryName = ""
+                    newCategoryIcon = "folder"
+                    showAddCategory = false
+                }
+            )
+        }
+        .sheet(isPresented: $showAddTag) {
+            AddTagSheet(
+                tagName: $newTagName,
+                tagColor: $newTagColor,
+                onSave: {
+                    let tag = Tag(name: newTagName, color: newTagColor)
+                    dataService.saveTag(tag)
+                    newTagName = ""
+                    newTagColor = .blue
+                    showAddTag = false
+                }
+            )
+        }
+    }
+}
+
+// MARK: - Add Category Sheet
+
+struct AddCategorySheet: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var categoryName: String
+    @Binding var categoryIcon: String
+    var onSave: () -> Void
+
+    let commonIcons = [
+        "folder", "laptopcomputer", "cart", "airplane", "car",
+        "fork.knife", "house", "heart", "star", "flag",
+        "book", "briefcase", "creditcard", "dollarsign", "chart.bar"
+    ]
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextField("Category Name", text: $categoryName)
+                        .autocapitalization(.words)
+                } header: {
+                    Text("Name")
+                }
+
+                Section {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 16) {
+                        ForEach(commonIcons, id: \.self) { icon in
+                            Button(action: {
+                                categoryIcon = icon
+                            }) {
+                                VStack {
+                                    Image(systemName: icon)
+                                        .font(.title2)
+                                        .foregroundColor(categoryIcon == icon ? .blue : .secondary)
+                                        .frame(width: 50, height: 50)
+                                        .background(categoryIcon == icon ? Color.blue.opacity(0.1) : Color.clear)
+                                        .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                } header: {
+                    Text("Icon")
+                }
+            }
+            .navigationTitle("Add Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave()
+                    }
+                    .disabled(categoryName.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Add Tag Sheet
+
+struct AddTagSheet: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var tagName: String
+    @Binding var tagColor: TagColor
+    var onSave: () -> Void
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextField("Tag Name", text: $tagName)
+                        .autocapitalization(.words)
+                } header: {
+                    Text("Name")
+                } footer: {
+                    Text("e.g., Project Alpha, Client XYZ")
+                }
+
+                Section {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 16) {
+                        ForEach(TagColor.allCases, id: \.self) { color in
+                            Button(action: {
+                                tagColor = color
+                            }) {
+                                VStack {
+                                    Image(systemName: "tag.fill")
+                                        .font(.title2)
+                                        .foregroundColor(color.color)
+                                        .frame(width: 50, height: 50)
+                                        .background(tagColor == color ? Color.gray.opacity(0.2) : Color.clear)
+                                        .cornerRadius(8)
+
+                                    Text(color.rawValue)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                } header: {
+                    Text("Color")
+                }
+            }
+            .navigationTitle("Add Tag")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave()
+                    }
+                    .disabled(tagName.isEmpty)
+                }
+            }
+        }
     }
 }
 

@@ -108,7 +108,7 @@ class ExportService {
     ) -> Data? {
         let pdfMetaData = [
             kCGPDFContextCreator: "InnieOutie",
-            kCGPDFContextTitle: "Monthly Financial Summary",
+            kCGPDFContextTitle: "Monthly Financial Report",
             kCGPDFContextAuthor: "InnieOutie App"
         ]
 
@@ -123,130 +123,161 @@ class ExportService {
 
             var yOffset: CGFloat = 40
 
-            // Title
+            // Gradient Header Bar
+            drawGradientHeader(rect: CGRect(x: 0, y: 0, width: 612, height: 100))
+
+            // Title with gradient effect (simulated with blue)
+            yOffset = 45
             yOffset = drawText(
                 "InnieOutie",
                 at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 32, weight: .bold),
-                color: .systemBlue
+                font: .systemFont(ofSize: 38, weight: .bold),
+                color: UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0)
             )
 
-            yOffset += 5
             yOffset = drawText(
                 "Finances Made Easy",
                 at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 14),
-                color: .systemBlue
+                font: .systemFont(ofSize: 13),
+                color: .white
             )
 
-            yOffset += 10
+            // Date on the right side of header
+            drawText(
+                Date().formatted(date: .long, time: .omitted),
+                at: CGPoint(x: 400, y: 55),
+                font: .systemFont(ofSize: 11),
+                color: .white
+            )
+
+            yOffset = 120
+
+            // Month title with underline
             yOffset = drawText(
-                "Monthly Financial Summary",
+                snapshot.monthName.uppercased(),
                 at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 18, weight: .medium)
+                font: .systemFont(ofSize: 24, weight: .semibold),
+                color: .black
+            )
+            drawLine(from: CGPoint(x: 50, y: yOffset + 5), to: CGPoint(x: 250, y: yOffset + 5), color: UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0), width: 2)
+
+            yOffset += 25
+
+            // Main Summary Cards
+            let cardWidth: CGFloat = 160
+            let cardHeight: CGFloat = 100
+            let cardSpacing: CGFloat = 20
+
+            // Income Card
+            let incomeCardRect = CGRect(x: 50, y: yOffset, width: cardWidth, height: cardHeight)
+            drawCard(
+                rect: incomeCardRect,
+                title: "TOTAL INCOME",
+                value: snapshot.formattedIncome,
+                color: UIColor.systemGreen,
+                isPositive: true
             )
 
-            yOffset += 5
-            yOffset = drawText(
-                snapshot.monthName,
-                at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 14),
-                color: .gray
+            // Expenses Card
+            let expensesCardRect = CGRect(x: 50 + cardWidth + cardSpacing, y: yOffset, width: cardWidth, height: cardHeight)
+            drawCard(
+                rect: expensesCardRect,
+                title: "TOTAL EXPENSES",
+                value: snapshot.formattedExpenses,
+                color: UIColor.systemRed,
+                isPositive: false
             )
 
-            yOffset += 30
-
-            // Summary box with border
-            let summaryRect = CGRect(x: 50, y: yOffset, width: 512, height: 120)
-            drawBox(rect: summaryRect, fillColor: .systemGray6, borderColor: .systemGray4)
-
-            yOffset += 20
-
-            // Net Profit (large and prominent)
-            yOffset = drawText(
-                "Net Profit",
-                at: CGPoint(x: 70, y: yOffset),
-                font: .systemFont(ofSize: 14),
-                color: .gray
+            // Net Profit Card (larger, more prominent)
+            let profitCardRect = CGRect(x: 50 + (cardWidth + cardSpacing) * 2, y: yOffset, width: cardWidth, height: cardHeight)
+            drawCard(
+                rect: profitCardRect,
+                title: "NET PROFIT",
+                value: snapshot.formattedProfit,
+                color: snapshot.isProfit ? UIColor.systemGreen : UIColor.systemRed,
+                isPositive: snapshot.isProfit,
+                isPrimary: true
             )
 
-            yOffset += 5
-            yOffset = drawText(
-                snapshot.formattedProfit,
-                at: CGPoint(x: 70, y: yOffset),
-                font: .systemFont(ofSize: 36, weight: .bold),
-                color: snapshot.isProfit ? .systemGreen : .systemRed
-            )
+            yOffset += cardHeight + 35
 
-            // Income and Expenses side by side
-            let leftX: CGFloat = 70
-            let rightX: CGFloat = 320
-
-            let savedY = yOffset
-            yOffset += 10
-
-            yOffset = drawText("Total Income", at: CGPoint(x: leftX, y: yOffset), font: .systemFont(ofSize: 12), color: .gray)
-            yOffset = drawText(snapshot.formattedIncome, at: CGPoint(x: leftX, y: yOffset), font: .systemFont(ofSize: 18, weight: .semibold))
-
-            yOffset = savedY + 10
-            yOffset = drawText("Total Expenses", at: CGPoint(x: rightX, y: yOffset), font: .systemFont(ofSize: 12), color: .gray)
-            yOffset = drawText(snapshot.formattedExpenses, at: CGPoint(x: rightX, y: yOffset), font: .systemFont(ofSize: 18, weight: .semibold))
-
-            yOffset = max(yOffset, summaryRect.maxY + 30)
-
-            // Top Expense Categories
-            yOffset = drawText(
-                "Top Expense Categories",
-                at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 18, weight: .semibold)
-            )
-
-            yOffset += 15
-
-            for (category, amount) in snapshot.topCategories.prefix(5) {
-                let percentage = snapshot.totalExpenses > 0 ?
-                    Double(truncating: (amount / snapshot.totalExpenses * 100) as NSNumber) : 0
-
-                let categoryText = "\(category.name)"
-                let amountText = "\(amount.formatted(.currency(code: "USD"))) (\(String(format: "%.0f%%", percentage)))"
-
-                yOffset = drawText(categoryText, at: CGPoint(x: 70, y: yOffset), font: .systemFont(ofSize: 14))
-                drawText(amountText, at: CGPoint(x: 400, y: yOffset - 14), font: .systemFont(ofSize: 14, weight: .medium))
-
-                yOffset += 5
-            }
-
-            yOffset += 20
-
-            // Income Sources
-            if !snapshot.incomeBySource.isEmpty {
-                yOffset = drawText(
-                    "Income by Source",
-                    at: CGPoint(x: 50, y: yOffset),
-                    font: .systemFont(ofSize: 18, weight: .semibold)
-                )
-
+            // Expense Categories Section
+            if !snapshot.topCategories.isEmpty {
+                yOffset = drawSectionHeader(title: "Expense Breakdown", at: yOffset)
                 yOffset += 15
 
-                for (source, amount) in snapshot.incomeBySource.prefix(5) {
+                // Table header
+                drawTableHeader(at: yOffset, leftText: "Category", rightText: "Amount")
+                yOffset += 25
+
+                for (index, (category, amount)) in snapshot.topCategories.prefix(7).enumerated() {
+                    let percentage = snapshot.totalExpenses > 0 ?
+                        Double(truncating: (amount / snapshot.totalExpenses * 100) as NSNumber) : 0
+
+                    let bgColor = index % 2 == 0 ? UIColor.systemGray6 : UIColor.white
+                    let rowRect = CGRect(x: 50, y: yOffset - 5, width: 512, height: 28)
+                    drawBox(rect: rowRect, fillColor: bgColor, borderColor: .clear)
+
+                    yOffset = drawText(
+                        category.name,
+                        at: CGPoint(x: 65, y: yOffset),
+                        font: .systemFont(ofSize: 13)
+                    )
+
+                    let amountText = "\(amount.formatted(.currency(code: "USD")))  (\(String(format: "%.0f%%", percentage)))"
+                    drawText(
+                        amountText,
+                        at: CGPoint(x: 410, y: yOffset - 13),
+                        font: .systemFont(ofSize: 13, weight: .medium)
+                    )
+
+                    yOffset += 8
+                }
+
+                yOffset += 20
+            }
+
+            // Income Sources Section
+            if !snapshot.incomeBySource.isEmpty {
+                yOffset = drawSectionHeader(title: "Income Sources", at: yOffset)
+                yOffset += 15
+
+                // Table header
+                drawTableHeader(at: yOffset, leftText: "Source", rightText: "Amount")
+                yOffset += 25
+
+                for (index, (source, amount)) in snapshot.incomeBySource.prefix(7).enumerated() {
                     let percentage = snapshot.totalIncome > 0 ?
                         Double(truncating: (amount / snapshot.totalIncome * 100) as NSNumber) : 0
 
-                    let amountText = "\(amount.formatted(.currency(code: "USD"))) (\(String(format: "%.0f%%", percentage)))"
+                    let bgColor = index % 2 == 0 ? UIColor.systemGray6 : UIColor.white
+                    let rowRect = CGRect(x: 50, y: yOffset - 5, width: 512, height: 28)
+                    drawBox(rect: rowRect, fillColor: bgColor, borderColor: .clear)
 
-                    yOffset = drawText(source, at: CGPoint(x: 70, y: yOffset), font: .systemFont(ofSize: 14))
-                    drawText(amountText, at: CGPoint(x: 400, y: yOffset - 14), font: .systemFont(ofSize: 14, weight: .medium))
+                    yOffset = drawText(
+                        source,
+                        at: CGPoint(x: 65, y: yOffset),
+                        font: .systemFont(ofSize: 13)
+                    )
 
-                    yOffset += 5
+                    let amountText = "\(amount.formatted(.currency(code: "USD")))  (\(String(format: "%.0f%%", percentage)))"
+                    drawText(
+                        amountText,
+                        at: CGPoint(x: 410, y: yOffset - 13),
+                        font: .systemFont(ofSize: 13, weight: .medium)
+                    )
+
+                    yOffset += 8
                 }
             }
 
             // Footer
-            let footerY: CGFloat = 750
+            let footerY: CGFloat = 760
+            drawLine(from: CGPoint(x: 50, y: footerY - 10), to: CGPoint(x: 562, y: footerY - 10), color: .lightGray, width: 1)
             drawText(
-                "Generated by InnieOutie on \(Date().formatted(date: .long, time: .omitted))",
+                "Generated by InnieOutie  |  \(Date().formatted(date: .abbreviated, time: .shortened))",
                 at: CGPoint(x: 50, y: footerY),
-                font: .systemFont(ofSize: 10),
+                font: .systemFont(ofSize: 9),
                 color: .gray
             )
         }
@@ -302,5 +333,105 @@ class ExportService {
         context?.setStrokeColor(borderColor.cgColor)
         context?.setLineWidth(1)
         context?.stroke(rect)
+    }
+
+    private static func drawLine(from: CGPoint, to: CGPoint, color: UIColor, width: CGFloat) {
+        let context = UIGraphicsGetCurrentContext()
+        context?.setStrokeColor(color.cgColor)
+        context?.setLineWidth(width)
+        context?.move(to: from)
+        context?.addLine(to: to)
+        context?.strokePath()
+    }
+
+    private static func drawGradientHeader(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+
+        // Create a gradient from blue to purple
+        let colors = [
+            UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0).cgColor,
+            UIColor(red: 0.5, green: 0.3, blue: 0.8, alpha: 1.0).cgColor
+        ] as CFArray
+
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: [0.0, 1.0])!
+
+        context?.saveGState()
+        context?.addRect(rect)
+        context?.clip()
+        context?.drawLinearGradient(
+            gradient,
+            start: CGPoint(x: rect.minX, y: rect.minY),
+            end: CGPoint(x: rect.maxX, y: rect.minY),
+            options: []
+        )
+        context?.restoreGState()
+    }
+
+    private static func drawCard(rect: CGRect, title: String, value: String, color: UIColor, isPositive: Bool, isPrimary: Bool = false) {
+        // Card background with subtle shadow effect
+        let context = UIGraphicsGetCurrentContext()
+        context?.saveGState()
+
+        // Shadow
+        context?.setShadow(offset: CGSize(width: 0, height: 2), blur: 4, color: UIColor.black.withAlphaComponent(0.1).cgColor)
+
+        // Card background
+        let borderColor = isPrimary ? color : UIColor.systemGray4
+        drawBox(rect: rect, fillColor: .white, borderColor: borderColor)
+
+        context?.restoreGState()
+
+        // Color accent bar at top
+        let accentRect = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 4)
+        drawBox(rect: accentRect, fillColor: color, borderColor: color)
+
+        // Title
+        drawText(
+            title,
+            at: CGPoint(x: rect.minX + 12, y: rect.minY + 18),
+            font: .systemFont(ofSize: 10, weight: .semibold),
+            color: .gray
+        )
+
+        // Value
+        drawText(
+            value,
+            at: CGPoint(x: rect.minX + 12, y: rect.minY + 35),
+            font: .systemFont(ofSize: isPrimary ? 26 : 22, weight: .bold),
+            color: color
+        )
+    }
+
+    @discardableResult
+    private static func drawSectionHeader(title: String, at yOffset: CGFloat) -> CGFloat {
+        drawBox(
+            rect: CGRect(x: 50, y: yOffset - 8, width: 512, height: 32),
+            fillColor: UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0),
+            borderColor: .clear
+        )
+
+        return drawText(
+            title,
+            at: CGPoint(x: 60, y: yOffset),
+            font: .systemFont(ofSize: 16, weight: .semibold),
+            color: UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0)
+        )
+    }
+
+    private static func drawTableHeader(at yOffset: CGFloat, leftText: String, rightText: String) {
+        drawText(
+            leftText.uppercased(),
+            at: CGPoint(x: 65, y: yOffset),
+            font: .systemFont(ofSize: 10, weight: .semibold),
+            color: .gray
+        )
+
+        drawText(
+            rightText.uppercased(),
+            at: CGPoint(x: 410, y: yOffset),
+            font: .systemFont(ofSize: 10, weight: .semibold),
+            color: .gray
+        )
     }
 }

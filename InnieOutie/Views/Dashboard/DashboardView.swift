@@ -11,12 +11,42 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @EnvironmentObject var paywallService: PaywallService
+    @State private var showTransactionsList = false
 
     var body: some View {
         NavigationView {
             ZStack {
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Branded header
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("InnieOutie")
+                                    .font(.system(size: 34, weight: .bold))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [.blue, .purple],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+
+                                Text("Finances Made Easy")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+
+                            Button(action: { showTransactionsList = true }) {
+                                Image(systemName: "list.bullet.rectangle")
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+
                         // Month selector
                         MonthPickerView(
                             selectedMonth: $viewModel.selectedMonth,
@@ -70,26 +100,18 @@ struct DashboardView: View {
                     )
                 }
             }
-            .navigationTitle("InnieOutie")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(action: { viewModel.refresh() }) {
-                            Label("Refresh", systemImage: "arrow.clockwise")
-                        }
-
-                        Button(action: { viewModel.showExportOptions = true }) {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                }
-            }
+            .navigationBarHidden(true)
             .sheet(isPresented: $viewModel.showExportOptions) {
                 ExportOptionsView(snapshot: viewModel.currentSnapshot)
                     .environmentObject(paywallService)
+            }
+            .sheet(isPresented: $showTransactionsList) {
+                TransactionsListView(
+                    selectedMonth: viewModel.selectedMonth,
+                    onTransactionUpdated: {
+                        viewModel.refresh()
+                    }
+                )
             }
         }
         .onAppear {

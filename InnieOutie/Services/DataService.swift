@@ -16,6 +16,7 @@ class DataService: ObservableObject {
     @Published var expenses: [Expense] = []
     @Published var income: [Income] = []
     @Published var categories: [Category] = []
+    @Published var tags: [Tag] = []
 
     init() {
         // Set up database path
@@ -34,6 +35,7 @@ class DataService: ObservableObject {
 
         // Load initial data
         loadCategories()
+        loadTags()
         loadCurrentMonthData()
     }
 
@@ -59,6 +61,7 @@ class DataService: ObservableObject {
             category_id TEXT NOT NULL,
             note TEXT,
             receipt_path TEXT,
+            tag_ids TEXT,
             created_at INTEGER NOT NULL
         );
         """
@@ -71,6 +74,7 @@ class DataService: ObservableObject {
             date INTEGER NOT NULL,
             source TEXT NOT NULL,
             note TEXT,
+            tag_ids TEXT,
             created_at INTEGER NOT NULL
         );
         """
@@ -86,13 +90,28 @@ class DataService: ObservableObject {
         );
         """
 
+        // Tags table
+        let createTagsTable = """
+        CREATE TABLE IF NOT EXISTS tags (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            color TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+        );
+        """
+
         executeSQL(createExpensesTable)
         executeSQL(createIncomeTable)
         executeSQL(createCategoriesTable)
+        executeSQL(createTagsTable)
 
         // Create indices
         executeSQL("CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date DESC);")
         executeSQL("CREATE INDEX IF NOT EXISTS idx_income_date ON income(date DESC);")
+
+        // Migration: Add tag_ids column to existing tables if it doesn't exist
+        executeSQL("ALTER TABLE expenses ADD COLUMN tag_ids TEXT DEFAULT '';")
+        executeSQL("ALTER TABLE income ADD COLUMN tag_ids TEXT DEFAULT '';")
     }
 
     private func executeSQL(_ sql: String) {
@@ -174,6 +193,88 @@ class DataService: ObservableObject {
 
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("Category saved successfully")
+                loadCategories()
+            }
+        }
+        sqlite3_finalize(statement)
+    }
+
+    func deleteCategory(_ category: Category) {
+        guard !category.isDefault else { return }  // Prevent deleting default categories
+
+        let deleteSQL = "DELETE FROM categories WHERE id = ?"
+        var statement: OpaquePointer?
+
+        if sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_text(statement, 1, (category.id as NSString).utf8String, -1, nil)
+
+            if sqlite3_step(statement) == SQLITE_DONE {
+                loadCategories()
+            }
+        }
+        sqlite3_finalize(statement)
+    }
+
+    // MARK: - Tags
+
+    func loadTags() {
+        var result: [Tag] = []
+        let query = "SELECT * FROM tags ORDER BY name"
+        var statement: OpaquePointer?
+
+        if sqlite3_prepare_v2(db, query, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let name = String(cString: sqlite3_column_text(statement, 1))
+                let colorRaw = String(cString: sqlite3_column_text(statement, 2))
+                let color = TagColor(rawValue: colorRaw) ?? .blue
+                let createdAt = Date(timeIntervalSince1970: TimeInterval(sqlite3_column_int64(statement, 3)))
+
+                result.append(Tag(
+                    id: id,
+                    name: name,
+                    color: color,
+                    createdAt: createdAt
+                ))
+            }
+        }
+        sqlite3_finalize(statement)
+
+        DispatchQueue.main.async {
+            self.tags = result
+        }
+    }
+
+    func saveTag(_ tag: Tag) {
+        let insertSQL = """
+        INSERT OR REPLACE INTO tags (id, name, color, created_at)
+        VALUES (?, ?, ?, ?);
+        """
+
+        var statement: OpaquePointer?
+        if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_text(statement, 1, (tag.id as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(statement, 2, (tag.name as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(statement, 3, (tag.color.rawValue as NSString).utf8String, -1, nil)
+            sqlite3_bind_int64(statement, 4, Int64(tag.createdAt.timeIntervalSince1970))
+
+            if sqlite3_step(statement) == SQLITE_DONE {
+                print("Tag saved successfully")
+                loadTags()
+            }
+        }
+        sqlite3_finalize(statement)
+    }
+
+    func deleteTag(_ tag: Tag) {
+        let deleteSQL = "DELETE FROM tags WHERE id = ?"
+        var statement: OpaquePointer?
+
+        if sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_text(statement, 1, (tag.id as NSString).utf8String, -1, nil)
+
+            if sqlite3_step(statement) == SQLITE_DONE {
+                loadTags()
             }
         }
         sqlite3_finalize(statement)
@@ -183,8 +284,8 @@ class DataService: ObservableObject {
 
     func saveExpense(_ expense: Expense) {
         let insertSQL = """
-        INSERT OR REPLACE INTO expenses (id, amount, date, category_id, note, receipt_path, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        INSERT OR REPLACE INTO expenses (id, amount, date, category_id, note, receipt_path, tag_ids, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         var statement: OpaquePointer?
@@ -206,7 +307,11 @@ class DataService: ObservableObject {
                 sqlite3_bind_null(statement, 6)
             }
 
-            sqlite3_bind_int64(statement, 7, Int64(expense.createdAt.timeIntervalSince1970))
+            // Store tag IDs as comma-separated string
+            let tagIdsString = expense.tagIds.joined(separator: ",")
+            sqlite3_bind_text(statement, 7, (tagIdsString as NSString).utf8String, -1, nil)
+
+            sqlite3_bind_int64(statement, 8, Int64(expense.createdAt.timeIntervalSince1970))
 
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("Expense saved successfully")
@@ -243,7 +348,14 @@ class DataService: ObservableObject {
                     nil
                 }
 
-                let createdAt = Date(timeIntervalSince1970: TimeInterval(sqlite3_column_int64(statement, 6)))
+                let tagIdsString: String = if let tagText = sqlite3_column_text(statement, 6) {
+                    String(cString: tagText)
+                } else {
+                    ""
+                }
+                let tagIds = tagIdsString.isEmpty ? [] : tagIdsString.split(separator: ",").map(String.init)
+
+                let createdAt = Date(timeIntervalSince1970: TimeInterval(sqlite3_column_int64(statement, 7)))
 
                 result.append(Expense(
                     id: id,
@@ -252,6 +364,7 @@ class DataService: ObservableObject {
                     categoryId: categoryId,
                     note: note,
                     receiptPath: receiptPath,
+                    tagIds: tagIds,
                     createdAt: createdAt
                 ))
             }
@@ -278,8 +391,8 @@ class DataService: ObservableObject {
 
     func saveIncome(_ income: Income) {
         let insertSQL = """
-        INSERT OR REPLACE INTO income (id, amount, date, source, note, created_at)
-        VALUES (?, ?, ?, ?, ?, ?);
+        INSERT OR REPLACE INTO income (id, amount, date, source, note, tag_ids, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
         """
 
         var statement: OpaquePointer?
@@ -295,7 +408,11 @@ class DataService: ObservableObject {
                 sqlite3_bind_null(statement, 5)
             }
 
-            sqlite3_bind_int64(statement, 6, Int64(income.createdAt.timeIntervalSince1970))
+            // Store tag IDs as comma-separated string
+            let tagIdsString = income.tagIds.joined(separator: ",")
+            sqlite3_bind_text(statement, 6, (tagIdsString as NSString).utf8String, -1, nil)
+
+            sqlite3_bind_int64(statement, 7, Int64(income.createdAt.timeIntervalSince1970))
 
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("Income saved successfully")
@@ -326,7 +443,14 @@ class DataService: ObservableObject {
                     nil
                 }
 
-                let createdAt = Date(timeIntervalSince1970: TimeInterval(sqlite3_column_int64(statement, 5)))
+                let tagIdsString: String = if let tagText = sqlite3_column_text(statement, 5) {
+                    String(cString: tagText)
+                } else {
+                    ""
+                }
+                let tagIds = tagIdsString.isEmpty ? [] : tagIdsString.split(separator: ",").map(String.init)
+
+                let createdAt = Date(timeIntervalSince1970: TimeInterval(sqlite3_column_int64(statement, 6)))
 
                 result.append(Income(
                     id: id,
@@ -334,6 +458,7 @@ class DataService: ObservableObject {
                     date: date,
                     source: source,
                     note: note,
+                    tagIds: tagIds,
                     createdAt: createdAt
                 ))
             }

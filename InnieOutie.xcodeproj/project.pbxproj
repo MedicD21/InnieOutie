@@ -12,6 +12,7 @@
 		AA0003 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0003 /* Expense.swift */; };
 		AA0004 /* Income.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004 /* Income.swift */; };
 		AA0005 /* MonthlySnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0005 /* MonthlySnapshot.swift */; };
+		AA0035 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0035 /* Tag.swift */; };
 		AA0006 /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0006 /* AuthenticationService.swift */; };
 		AA0007 /* CalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0007 /* CalculationService.swift */; };
 		AA0008 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0008 /* DataService.swift */; };
@@ -25,6 +26,7 @@
 		AA0016 /* MonthlyReportsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0016 /* MonthlyReportsViewModel.swift */; };
 		AA0017 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0017 /* AuthenticationView.swift */; };
 		AA0018 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0018 /* DashboardView.swift */; };
+		AA0036 /* TransactionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0036 /* TransactionsListView.swift */; };
 		AA0019 /* IncomeSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0019 /* IncomeSourcesView.swift */; };
 		AA0020 /* MonthPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0020 /* MonthPickerView.swift */; };
 		AA0021 /* ProfitCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0021 /* ProfitCardView.swift */; };
@@ -40,6 +42,7 @@
 		AA0031 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB0031 /* Assets.xcassets */; };
 		CB1820422EFF224A00600F68 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB1820412EFF224A00600F68 /* StoreKit.framework */; };
 		CB1820442EFF238B00600F68 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = CB1820432EFF238B00600F68 /* Configuration.storekit */; };
+		CB1820462EFF26B600600F68 /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1820452EFF26B600600F68 /* AppearanceManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +51,7 @@
 		BB0003 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
 		BB0004 /* Income.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Income.swift; sourceTree = "<group>"; };
 		BB0005 /* MonthlySnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlySnapshot.swift; sourceTree = "<group>"; };
+		BB0035 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		BB0006 /* AuthenticationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationService.swift; sourceTree = "<group>"; };
 		BB0007 /* CalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationService.swift; sourceTree = "<group>"; };
 		BB0008 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
@@ -77,6 +81,7 @@
 		CB18203F2EFF211B00600F68 /* InnieOutie.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InnieOutie.entitlements; sourceTree = "<group>"; };
 		CB1820412EFF224A00600F68 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		CB1820432EFF238B00600F68 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
+		CB1820452EFF26B600600F68 /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
 		CC0001 /* InnieOutie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InnieOutie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -140,6 +145,7 @@
 				BB0003 /* Expense.swift */,
 				BB0004 /* Income.swift */,
 				BB0005 /* MonthlySnapshot.swift */,
+				BB0035 /* Tag.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -185,6 +191,7 @@
 		EE0008 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				CB1820452EFF26B600600F68 /* AppearanceManager.swift */,
 				BB0011 /* Extensions.swift */,
 				BB0012 /* SampleData.swift */,
 			);
@@ -339,11 +346,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB1820462EFF26B600600F68 /* AppearanceManager.swift in Sources */,
 				AA0001 /* ProfitLensApp.swift in Sources */,
 				AA0002 /* Category.swift in Sources */,
 				AA0003 /* Expense.swift in Sources */,
 				AA0004 /* Income.swift in Sources */,
 				AA0005 /* MonthlySnapshot.swift in Sources */,
+				AA0035 /* Tag.swift in Sources */,
 				AA0006 /* AuthenticationService.swift in Sources */,
 				AA0007 /* CalculationService.swift in Sources */,
 				AA0008 /* DataService.swift in Sources */,

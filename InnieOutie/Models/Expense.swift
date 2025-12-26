@@ -14,6 +14,7 @@ struct Expense: Identifiable, Codable, Hashable {
     var categoryId: String
     var note: String?
     var receiptPath: String?  // Pro only - stores local file path
+    var tagIds: [String]  // Tags for project/client tracking
     let createdAt: Date
 
     init(
@@ -23,6 +24,7 @@ struct Expense: Identifiable, Codable, Hashable {
         categoryId: String,
         note: String? = nil,
         receiptPath: String? = nil,
+        tagIds: [String] = [],
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -31,6 +33,7 @@ struct Expense: Identifiable, Codable, Hashable {
         self.categoryId = categoryId
         self.note = note
         self.receiptPath = receiptPath
+        self.tagIds = tagIds
         self.createdAt = createdAt
     }
 

@@ -17,13 +17,35 @@ class AddExpenseViewModel: ObservableObject {
     @Published var note: String = ""
     @Published var selectedPhoto: PhotosPickerItem?
     @Published var receiptImage: UIImage?
+    @Published var selectedTagIds: Set<String> = []
 
     @Published var categories: [Category] = []
+    @Published var tags: [Tag] = []
 
     private let dataService = DataService()
+    private var editingExpense: Expense?
 
-    init() {
+    init(expense: Expense? = nil) {
+        self.editingExpense = expense
+
+        if let expense = expense {
+            self.amountString = "\(expense.amount)"
+            self.date = expense.date
+            self.selectedCategoryId = expense.categoryId
+            self.note = expense.note ?? ""
+            self.selectedTagIds = Set(expense.tagIds)
+            // Load receipt image if exists
+            if let receiptPath = expense.receiptPath {
+                loadReceiptImage(from: receiptPath)
+            }
+        }
+
         loadCategories()
+        loadTags()
+    }
+
+    var isEditMode: Bool {
+        editingExpense != nil
     }
 
     var isValid: Bool {
@@ -42,10 +64,22 @@ class AddExpenseViewModel: ObservableObject {
         }
     }
 
+    func loadTags() {
+        tags = dataService.tags
+    }
+
+    func toggleTag(_ tagId: String) {
+        if selectedTagIds.contains(tagId) {
+            selectedTagIds.remove(tagId)
+        } else {
+            selectedTagIds.insert(tagId)
+        }
+    }
+
     func save() {
         guard let amount = Decimal(string: amountString) else { return }
 
-        var receiptPath: String? = nil
+        var receiptPath: String? = editingExpense?.receiptPath
 
         // Save receipt image if provided (Pro feature)
         if let image = receiptImage {
@@ -53,14 +87,22 @@ class AddExpenseViewModel: ObservableObject {
         }
 
         let expense = Expense(
+            id: editingExpense?.id ?? UUID().uuidString,
             amount: amount,
             date: date,
             categoryId: selectedCategoryId,
             note: note.isEmpty ? nil : note,
-            receiptPath: receiptPath
+            receiptPath: receiptPath,
+            tagIds: Array(selectedTagIds),
+            createdAt: editingExpense?.createdAt ?? Date()
         )
 
         dataService.saveExpense(expense)
+    }
+
+    func delete() {
+        guard let expense = editingExpense else { return }
+        dataService.deleteExpense(expense)
     }
 
     private func saveReceiptImage(_ image: UIImage) -> String? {
@@ -94,6 +136,12 @@ class AddExpenseViewModel: ObservableObject {
                let image = UIImage(data: data) {
                 self.receiptImage = image
             }
+        }
+    }
+
+    private func loadReceiptImage(from path: String) {
+        if let image = UIImage(contentsOfFile: path) {
+            self.receiptImage = image
         }
     }
 }

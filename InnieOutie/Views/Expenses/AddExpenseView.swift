@@ -11,10 +11,16 @@ import PhotosUI
 
 struct AddExpenseView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var viewModel = AddExpenseViewModel()
+    @StateObject private var viewModel: AddExpenseViewModel
     @EnvironmentObject var paywallService: PaywallService
 
+    @State private var showDeleteAlert = false
     var onSave: (() -> Void)?
+
+    init(expense: Expense? = nil, onSave: (() -> Void)? = nil) {
+        _viewModel = StateObject(wrappedValue: AddExpenseViewModel(expense: expense))
+        self.onSave = onSave
+    }
 
     var body: some View {
         NavigationView {
@@ -56,6 +62,36 @@ struct AddExpenseView: View {
                     Text("Details")
                 }
 
+                // Tags section
+                if !viewModel.tags.isEmpty {
+                    Section {
+                        ForEach(viewModel.tags) { tag in
+                            Button(action: {
+                                viewModel.toggleTag(tag.id)
+                            }) {
+                                HStack {
+                                    Image(systemName: tag.color.icon)
+                                        .foregroundColor(tag.color.color)
+
+                                    Text(tag.name)
+                                        .foregroundColor(.primary)
+
+                                    Spacer()
+
+                                    if viewModel.selectedTagIds.contains(tag.id) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Tags (Optional)")
+                    } footer: {
+                        Text("Tag by project or client")
+                    }
+                }
+
                 // Receipt section (Pro feature)
                 Section {
                     if paywallService.isPro {
@@ -93,8 +129,23 @@ struct AddExpenseView: View {
                         Text("Receipt storage is a Pro feature")
                     }
                 }
+
+                // Delete button (only in edit mode)
+                if viewModel.isEditMode {
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteAlert = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Label("Delete Expense", systemImage: "trash")
+                                Spacer()
+                            }
+                        }
+                    }
+                }
             }
-            .navigationTitle("Add Expense")
+            .navigationTitle(viewModel.isEditMode ? "Edit Expense" : "Add Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -105,13 +156,25 @@ struct AddExpenseView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        viewModel.save()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            viewModel.save()
+                        }
                         onSave?()
                         dismiss()
                     }
                     .disabled(!viewModel.isValid)
                     .fontWeight(.semibold)
                 }
+            }
+            .alert("Delete Expense", isPresented: $showDeleteAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    viewModel.delete()
+                    onSave?()
+                    dismiss()
+                }
+            } message: {
+                Text("Are you sure you want to delete this expense? This action cannot be undone.")
             }
         }
     }
