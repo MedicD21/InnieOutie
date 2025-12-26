@@ -65,6 +65,7 @@
 		BB0016 /* MonthlyReportsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReportsViewModel.swift; sourceTree = "<group>"; };
 		BB0017 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		BB0018 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		BB0036 /* TransactionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListView.swift; sourceTree = "<group>"; };
 		BB0019 /* IncomeSourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeSourcesView.swift; sourceTree = "<group>"; };
 		BB0020 /* MonthPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthPickerView.swift; sourceTree = "<group>"; };
 		BB0021 /* ProfitCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfitCardView.swift; sourceTree = "<group>"; };
@@ -218,6 +219,7 @@
 			isa = PBXGroup;
 			children = (
 				BB0018 /* DashboardView.swift */,
+				BB0036 /* TransactionsListView.swift */,
 				BB0019 /* IncomeSourcesView.swift */,
 				BB0020 /* MonthPickerView.swift */,
 				BB0021 /* ProfitCardView.swift */,
@@ -366,6 +368,7 @@
 				AA0016 /* MonthlyReportsViewModel.swift in Sources */,
 				AA0017 /* AuthenticationView.swift in Sources */,
 				AA0018 /* DashboardView.swift in Sources */,
+				AA0036 /* TransactionsListView.swift in Sources */,
 				AA0019 /* IncomeSourcesView.swift in Sources */,
 				AA0020 /* MonthPickerView.swift in Sources */,
 				AA0021 /* ProfitCardView.swift in Sources */,

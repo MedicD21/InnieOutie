@@ -13,19 +13,34 @@ struct ProfitCardView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Header
-            Text("Net Profit")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
-                .tracking(1)
+            // Header with icon
+            HStack(spacing: 8) {
+                Image(systemName: snapshot.isProfit ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(snapshot.isProfit ? .green : .red)
 
-            // THE BIG NUMBER - hero element
+                Text("Net Profit")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(1)
+            }
+
+            // THE BIG NUMBER - hero element with gradient
             Text(snapshot.formattedProfit)
                 .font(.system(size: 52, weight: .bold, design: .rounded))
-                .foregroundColor(snapshot.isProfit ? .green : .red)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: snapshot.isProfit ?
+                            [.green, .green.opacity(0.8)] :
+                            [.red, .red.opacity(0.8)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
+                .shadow(color: (snapshot.isProfit ? Color.green : Color.red).opacity(0.3), radius: 8, x: 0, y: 4)
 
             // Profit margin
             if snapshot.totalIncome > 0 {
@@ -93,11 +108,27 @@ struct ProfitCardView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .padding(24)
+        .padding(28)
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.secondarySystemBackground))
-                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
+            ZStack {
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.secondarySystemBackground))
+
+                RoundedRectangle(cornerRadius: 24)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                (snapshot.isProfit ? Color.green : Color.red).opacity(0.3),
+                                (snapshot.isProfit ? Color.green : Color.red).opacity(0.1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+            }
+            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            .shadow(color: (snapshot.isProfit ? Color.green : Color.red).opacity(0.1), radius: 20, x: 0, y: 10)
         )
     }
 }
