@@ -1,0 +1,583 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0001 /* ProfitLensApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001 /* ProfitLensApp.swift */; };
+		AA0002 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0002 /* Category.swift */; };
+		AA0003 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0003 /* Expense.swift */; };
+		AA0004 /* Income.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004 /* Income.swift */; };
+		AA0005 /* MonthlySnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0005 /* MonthlySnapshot.swift */; };
+		AA0006 /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0006 /* AuthenticationService.swift */; };
+		AA0007 /* CalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0007 /* CalculationService.swift */; };
+		AA0008 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0008 /* DataService.swift */; };
+		AA0009 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0009 /* ExportService.swift */; };
+		AA0010 /* PaywallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0010 /* PaywallService.swift */; };
+		AA0011 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0011 /* Extensions.swift */; };
+		AA0012 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0012 /* SampleData.swift */; };
+		AA0013 /* AddExpenseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0013 /* AddExpenseViewModel.swift */; };
+		AA0014 /* AddIncomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0014 /* AddIncomeViewModel.swift */; };
+		AA0015 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0015 /* DashboardViewModel.swift */; };
+		AA0016 /* MonthlyReportsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0016 /* MonthlyReportsViewModel.swift */; };
+		AA0017 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0017 /* AuthenticationView.swift */; };
+		AA0018 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0018 /* DashboardView.swift */; };
+		AA0019 /* IncomeSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0019 /* IncomeSourcesView.swift */; };
+		AA0020 /* MonthPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0020 /* MonthPickerView.swift */; };
+		AA0021 /* ProfitCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0021 /* ProfitCardView.swift */; };
+		AA0022 /* QuickAddBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0022 /* QuickAddBar.swift */; };
+		AA0023 /* TopCategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0023 /* TopCategoriesView.swift */; };
+		AA0024 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0024 /* AddExpenseView.swift */; };
+		AA0025 /* AddIncomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0025 /* AddIncomeView.swift */; };
+		AA0026 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0026 /* OnboardingView.swift */; };
+		AA0027 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0027 /* PaywallView.swift */; };
+		AA0028 /* ExportOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0028 /* ExportOptionsView.swift */; };
+		AA0029 /* MonthlyReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0029 /* MonthlyReportsView.swift */; };
+		AA0030 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0030 /* SettingsView.swift */; };
+		AA0031 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB0031 /* Assets.xcassets */; };
+		CB1820422EFF224A00600F68 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB1820412EFF224A00600F68 /* StoreKit.framework */; };
+		CB1820442EFF238B00600F68 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = CB1820432EFF238B00600F68 /* Configuration.storekit */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BB0001 /* ProfitLensApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfitLensApp.swift; sourceTree = "<group>"; };
+		BB0002 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		BB0003 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
+		BB0004 /* Income.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Income.swift; sourceTree = "<group>"; };
+		BB0005 /* MonthlySnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlySnapshot.swift; sourceTree = "<group>"; };
+		BB0006 /* AuthenticationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationService.swift; sourceTree = "<group>"; };
+		BB0007 /* CalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationService.swift; sourceTree = "<group>"; };
+		BB0008 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
+		BB0009 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		BB0010 /* PaywallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallService.swift; sourceTree = "<group>"; };
+		BB0011 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		BB0012 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		BB0013 /* AddExpenseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseViewModel.swift; sourceTree = "<group>"; };
+		BB0014 /* AddIncomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddIncomeViewModel.swift; sourceTree = "<group>"; };
+		BB0015 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		BB0016 /* MonthlyReportsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReportsViewModel.swift; sourceTree = "<group>"; };
+		BB0017 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
+		BB0018 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		BB0019 /* IncomeSourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeSourcesView.swift; sourceTree = "<group>"; };
+		BB0020 /* MonthPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthPickerView.swift; sourceTree = "<group>"; };
+		BB0021 /* ProfitCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfitCardView.swift; sourceTree = "<group>"; };
+		BB0022 /* QuickAddBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddBar.swift; sourceTree = "<group>"; };
+		BB0023 /* TopCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoriesView.swift; sourceTree = "<group>"; };
+		BB0024 /* AddExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseView.swift; sourceTree = "<group>"; };
+		BB0025 /* AddIncomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddIncomeView.swift; sourceTree = "<group>"; };
+		BB0026 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		BB0027 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		BB0028 /* ExportOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportOptionsView.swift; sourceTree = "<group>"; };
+		BB0029 /* MonthlyReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReportsView.swift; sourceTree = "<group>"; };
+		BB0030 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BB0031 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CB18203F2EFF211B00600F68 /* InnieOutie.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InnieOutie.entitlements; sourceTree = "<group>"; };
+		CB1820412EFF224A00600F68 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		CB1820432EFF238B00600F68 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
+		CC0001 /* InnieOutie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InnieOutie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DD0001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CB1820422EFF224A00600F68 /* StoreKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CB1820402EFF224A00600F68 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CB1820412EFF224A00600F68 /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EE0001 = {
+			isa = PBXGroup;
+			children = (
+				EE0002 /* InnieOutie */,
+				CB1820402EFF224A00600F68 /* Frameworks */,
+				EE0003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EE0002 /* InnieOutie */ = {
+			isa = PBXGroup;
+			children = (
+				CB1820432EFF238B00600F68 /* Configuration.storekit */,
+				CB18203F2EFF211B00600F68 /* InnieOutie.entitlements */,
+				BB0001 /* ProfitLensApp.swift */,
+				EE0004 /* Models */,
+				EE0005 /* Views */,
+				EE0006 /* ViewModels */,
+				EE0007 /* Services */,
+				EE0008 /* Utils */,
+				EE0009 /* Resources */,
+			);
+			path = InnieOutie;
+			sourceTree = "<group>";
+		};
+		EE0003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CC0001 /* InnieOutie.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EE0004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				BB0002 /* Category.swift */,
+				BB0003 /* Expense.swift */,
+				BB0004 /* Income.swift */,
+				BB0005 /* MonthlySnapshot.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		EE0005 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				EE0010 /* Authentication */,
+				EE0011 /* Dashboard */,
+				EE0012 /* Expenses */,
+				EE0013 /* Income */,
+				EE0014 /* Onboarding */,
+				EE0015 /* Paywall */,
+				EE0016 /* Reports */,
+				EE0017 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		EE0006 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				BB0013 /* AddExpenseViewModel.swift */,
+				BB0014 /* AddIncomeViewModel.swift */,
+				BB0015 /* DashboardViewModel.swift */,
+				BB0016 /* MonthlyReportsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		EE0007 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				BB0006 /* AuthenticationService.swift */,
+				BB0007 /* CalculationService.swift */,
+				BB0008 /* DataService.swift */,
+				BB0009 /* ExportService.swift */,
+				BB0010 /* PaywallService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		EE0008 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				BB0011 /* Extensions.swift */,
+				BB0012 /* SampleData.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		EE0009 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BB0031 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		EE0010 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				BB0017 /* AuthenticationView.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		EE0011 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				BB0018 /* DashboardView.swift */,
+				BB0019 /* IncomeSourcesView.swift */,
+				BB0020 /* MonthPickerView.swift */,
+				BB0021 /* ProfitCardView.swift */,
+				BB0022 /* QuickAddBar.swift */,
+				BB0023 /* TopCategoriesView.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		EE0012 /* Expenses */ = {
+			isa = PBXGroup;
+			children = (
+				BB0024 /* AddExpenseView.swift */,
+			);
+			path = Expenses;
+			sourceTree = "<group>";
+		};
+		EE0013 /* Income */ = {
+			isa = PBXGroup;
+			children = (
+				BB0025 /* AddIncomeView.swift */,
+			);
+			path = Income;
+			sourceTree = "<group>";
+		};
+		EE0014 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				BB0026 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		EE0015 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				BB0027 /* PaywallView.swift */,
+			);
+			path = Paywall;
+			sourceTree = "<group>";
+		};
+		EE0016 /* Reports */ = {
+			isa = PBXGroup;
+			children = (
+				BB0028 /* ExportOptionsView.swift */,
+				BB0029 /* MonthlyReportsView.swift */,
+			);
+			path = Reports;
+			sourceTree = "<group>";
+		};
+		EE0017 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				BB0030 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FF0001 /* InnieOutie */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FF0002 /* Build configuration list for PBXNativeTarget "InnieOutie" */;
+			buildPhases = (
+				FF0003 /* Sources */,
+				DD0001 /* Frameworks */,
+				FF0004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InnieOutie;
+			productName = InnieOutie;
+			productReference = CC0001 /* InnieOutie.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		GG0001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					FF0001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = GG0002 /* Build configuration list for PBXProject "InnieOutie" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EE0001;
+			productRefGroup = EE0003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FF0001 /* InnieOutie */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FF0004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0031 /* Assets.xcassets in Resources */,
+				CB1820442EFF238B00600F68 /* Configuration.storekit in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FF0003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0001 /* ProfitLensApp.swift in Sources */,
+				AA0002 /* Category.swift in Sources */,
+				AA0003 /* Expense.swift in Sources */,
+				AA0004 /* Income.swift in Sources */,
+				AA0005 /* MonthlySnapshot.swift in Sources */,
+				AA0006 /* AuthenticationService.swift in Sources */,
+				AA0007 /* CalculationService.swift in Sources */,
+				AA0008 /* DataService.swift in Sources */,
+				AA0009 /* ExportService.swift in Sources */,
+				AA0010 /* PaywallService.swift in Sources */,
+				AA0011 /* Extensions.swift in Sources */,
+				AA0012 /* SampleData.swift in Sources */,
+				AA0013 /* AddExpenseViewModel.swift in Sources */,
+				AA0014 /* AddIncomeViewModel.swift in Sources */,
+				AA0015 /* DashboardViewModel.swift in Sources */,
+				AA0016 /* MonthlyReportsViewModel.swift in Sources */,
+				AA0017 /* AuthenticationView.swift in Sources */,
+				AA0018 /* DashboardView.swift in Sources */,
+				AA0019 /* IncomeSourcesView.swift in Sources */,
+				AA0020 /* MonthPickerView.swift in Sources */,
+				AA0021 /* ProfitCardView.swift in Sources */,
+				AA0022 /* QuickAddBar.swift in Sources */,
+				AA0023 /* TopCategoriesView.swift in Sources */,
+				AA0024 /* AddExpenseView.swift in Sources */,
+				AA0025 /* AddIncomeView.swift in Sources */,
+				AA0026 /* OnboardingView.swift in Sources */,
+				AA0027 /* PaywallView.swift in Sources */,
+				AA0028 /* ExportOptionsView.swift in Sources */,
+				AA0029 /* MonthlyReportsView.swift in Sources */,
+				AA0030 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		HH0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		HH0002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		HH0003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = InnieOutie/InnieOutie.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 286LKF859M;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = InnieOutie;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dushin.innieoutie.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		HH0004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = InnieOutie/InnieOutie.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 286LKF859M;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = InnieOutie;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dushin.innieoutie.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FF0002 /* Build configuration list for PBXNativeTarget "InnieOutie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				HH0003 /* Debug */,
+				HH0004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		GG0002 /* Build configuration list for PBXProject "InnieOutie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				HH0001 /* Debug */,
+				HH0002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = GG0001 /* Project object */;
+}
