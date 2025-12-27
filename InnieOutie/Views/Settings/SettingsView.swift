@@ -13,6 +13,7 @@ struct SettingsView: View {
     @EnvironmentObject var appearanceManager: AppearanceManager
 
     @State private var showSignOutAlert = false
+    @State private var showTagReports = false
 
     var body: some View {
         NavigationView {
@@ -134,6 +135,19 @@ struct SettingsView: View {
                         Label("Manage Categories", systemImage: "tag")
                     }
 
+                    Button(action: { showTagReports = true }) {
+                        HStack {
+                            Label("Project Reports", systemImage: "doc.text.magnifyingglass")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if !paywallService.isPro {
+                                Image(systemName: "lock.fill")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            }
+                        }
+                    }
+
                     Button(action: {}) {
                         Label("Backup Data", systemImage: "icloud.and.arrow.up")
                     }
@@ -143,7 +157,9 @@ struct SettingsView: View {
                     Text("Data")
                 } footer: {
                     if !paywallService.isPro {
-                        Text("Cloud backup requires Pro")
+                        Text("Cloud backup and project reports require Pro")
+                    } else {
+                        Text("Generate detailed reports for specific projects or clients")
                     }
                 }
 
@@ -198,7 +214,296 @@ struct SettingsView: View {
             } message: {
                 Text("Are you sure you want to sign out? Your data will remain on this device.")
             }
+            .sheet(isPresented: $showTagReports) {
+                TagReportViewInline()
+                    .environmentObject(paywallService)
+            }
         }
+    }
+}
+
+// MARK: - Tag Report View (Inline)
+
+struct TagReportViewInline: View {
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var paywallService: PaywallService
+    @StateObject private var dataService = DataService()
+
+    @State private var selectedTagId: String = ""
+    @State private var startDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+    @State private var endDate = Date()
+    @State private var showShareSheet = false
+    @State private var shareURL: URL?
+    @State private var isExporting = false
+
+    var body: some View {
+        NavigationView {
+            Form {
+                // Tag selection
+                Section {
+                    Picker("Project/Client Tag", selection: $selectedTagId) {
+                        Text("Select a tag").tag("")
+                        ForEach(dataService.tags) { tag in
+                            Label {
+                                Text(tag.name)
+                            } icon: {
+                                Image(systemName: tag.color.icon)
+                                    .foregroundColor(tag.color.color)
+                            }
+                            .tag(tag.id)
+                        }
+                    }
+                } header: {
+                    Text("Tag Selection")
+                } footer: {
+                    Text("Choose the project or client tag to generate a report for")
+                }
+
+                // Date range
+                Section {
+                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
+                    DatePicker("End Date", selection: $endDate, displayedComponents: .date)
+
+                    // Quick date range buttons
+                    VStack(spacing: 8) {
+                        HStack(spacing: 8) {
+                            QuickDateButton(title: "This Month") {
+                                let calendar = Calendar.current
+                                startDate = calendar.date(from: calendar.dateComponents([.year, .month], from: Date()))!
+                                endDate = Date()
+                            }
+                            QuickDateButton(title: "Last 3 Months") {
+                                startDate = Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date()
+                                endDate = Date()
+                            }
+                        }
+
+                        HStack(spacing: 8) {
+                            QuickDateButton(title: "Last 6 Months") {
+                                startDate = Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date()
+                                endDate = Date()
+                            }
+                            QuickDateButton(title: "This Year") {
+                                let calendar = Calendar.current
+                                let year = calendar.component(.year, from: Date())
+                                startDate = calendar.date(from: DateComponents(year: year, month: 1, day: 1))!
+                                endDate = Date()
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                } header: {
+                    Text("Date Range")
+                } footer: {
+                    Text("Select the date range for the report")
+                }
+
+                // Preview section
+                if let selectedTag = dataService.tags.first(where: { $0.id == selectedTagId }),
+                   !selectedTagId.isEmpty {
+                    Section {
+                        VStack(spacing: 12) {
+                            HStack {
+                                Image(systemName: selectedTag.color.icon)
+                                    .foregroundColor(selectedTag.color.color)
+                                Text(selectedTag.name)
+                                    .font(.headline)
+                                Spacer()
+                            }
+
+                            HStack {
+                                Text("Period:")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(startDate.formatted(date: .abbreviated, time: .omitted)) - \(endDate.formatted(date: .abbreviated, time: .omitted))")
+                                    .font(.callout)
+                            }
+
+                            if let stats = getTagStats(
+                                tagId: selectedTagId,
+                                startDate: startDate,
+                                endDate: endDate
+                            ) {
+                                Divider()
+                                    .padding(.vertical, 4)
+
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Income")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        Text(formatCurrency(stats.income))
+                                            .font(.title3.bold())
+                                            .foregroundColor(.green)
+                                    }
+
+                                    Spacer()
+
+                                    VStack(alignment: .trailing, spacing: 4) {
+                                        Text("Expenses")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        Text(formatCurrency(stats.expenses))
+                                            .font(.title3.bold())
+                                            .foregroundColor(.red)
+                                    }
+                                }
+
+                                Divider()
+                                    .padding(.vertical, 4)
+
+                                HStack {
+                                    Text("Net Profit")
+                                        .font(.subheadline.weight(.semibold))
+                                    Spacer()
+                                    Text(formatCurrency(stats.profit))
+                                        .font(.title3.bold())
+                                        .foregroundColor(stats.profit >= 0 ? .green : .red)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    } header: {
+                        Text("Report Preview")
+                    }
+                }
+
+                // Export button
+                Section {
+                    Button(action: exportReport) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(.blue)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Generate Report")
+                                    .foregroundColor(.primary)
+
+                                Text("Export detailed CSV report with all transactions")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+
+                            if !paywallService.isPro {
+                                Image(systemName: "lock.fill")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            }
+                        }
+                    }
+                    .disabled(selectedTagId.isEmpty || isExporting)
+                } footer: {
+                    if !paywallService.isPro {
+                        Text("Tag reports are a Pro feature")
+                    }
+                }
+            }
+            .navigationTitle("Project Reports")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+            }
+            .sheet(isPresented: $showShareSheet) {
+                if let url = shareURL {
+                    ShareSheet(items: [url])
+                }
+            }
+        }
+    }
+
+    private func exportReport() {
+        guard paywallService.requestAccess(to: .csvExport, trigger: .exportCSV) else {
+            return
+        }
+
+        guard let tag = dataService.tags.first(where: { $0.id == selectedTagId }) else {
+            return
+        }
+
+        isExporting = true
+
+        Task {
+            let csv = ExportService.exportByTag(
+                tag: tag,
+                dateRange: startDate...endDate,
+                allExpenses: dataService.loadAllExpenses(),
+                allIncome: dataService.loadAllIncome(),
+                categories: dataService.categories
+            )
+
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let startStr = dateFormatter.string(from: startDate)
+            let endStr = dateFormatter.string(from: endDate)
+
+            let safeName = tag.name.replacingOccurrences(of: " ", with: "_")
+
+            if let url = ExportService.saveCSVToFile(
+                csv: csv,
+                filename: "project_\(safeName)_\(startStr)_to_\(endStr).csv"
+            ) {
+                shareURL = url
+                showShareSheet = true
+            }
+
+            isExporting = false
+        }
+    }
+
+    struct TagStats {
+        let income: Decimal
+        let expenses: Decimal
+        let profit: Decimal
+    }
+
+    private func getTagStats(tagId: String, startDate: Date, endDate: Date) -> TagStats? {
+        let dateRange = startDate...endDate
+
+        let taggedExpenses = dataService.loadAllExpenses().filter {
+            $0.tagIds.contains(tagId) && dateRange.contains($0.date)
+        }
+        let taggedIncome = dataService.loadAllIncome().filter {
+            $0.tagIds.contains(tagId) && dateRange.contains($0.date)
+        }
+
+        let income = taggedIncome.reduce(Decimal(0)) { $0 + $1.amount }
+        let expenses = taggedExpenses.reduce(Decimal(0)) { $0 + $1.amount }
+        let profit = income - expenses
+
+        return TagStats(income: income, expenses: expenses, profit: profit)
+    }
+
+    private func formatCurrency(_ amount: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        return formatter.string(from: NSDecimalNumber(decimal: amount)) ?? "$0.00"
+    }
+}
+
+// MARK: - Quick Date Button
+
+struct QuickDateButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.blue.opacity(0.1))
+                .foregroundColor(.blue)
+                .cornerRadius(8)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -408,17 +713,33 @@ struct AddTagSheet: View {
                             Button(action: {
                                 tagColor = color
                             }) {
-                                VStack {
-                                    Image(systemName: "tag.fill")
-                                        .font(.title2)
-                                        .foregroundColor(color.color)
-                                        .frame(width: 50, height: 50)
-                                        .background(tagColor == color ? Color.gray.opacity(0.2) : Color.clear)
-                                        .cornerRadius(8)
+                                VStack(spacing: 4) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(tagColor == color ? color.color.opacity(0.2) : Color(.systemGray6))
+                                            .frame(width: 50, height: 50)
+
+                                        Image(systemName: "tag.fill")
+                                            .font(.title2)
+                                            .foregroundColor(color.color)
+
+                                        if tagColor == color {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .font(.caption)
+                                                .foregroundColor(.white)
+                                                .background(
+                                                    Circle()
+                                                        .fill(color.color)
+                                                        .frame(width: 18, height: 18)
+                                                )
+                                                .offset(x: 15, y: -15)
+                                        }
+                                    }
 
                                     Text(color.rawValue)
                                         .font(.caption2)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(tagColor == color ? .primary : .secondary)
+                                        .fontWeight(tagColor == color ? .semibold : .regular)
                                 }
                             }
                         }

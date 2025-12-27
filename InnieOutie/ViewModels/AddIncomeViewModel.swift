@@ -34,7 +34,12 @@ class AddIncomeViewModel: ObservableObject {
         }
 
         loadRecentSources()
-        loadTags()
+
+        // Load tags after a short delay to ensure DataService has initialized
+        Task {
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            await loadTags()
+        }
     }
 
     var isEditMode: Bool {
@@ -48,7 +53,7 @@ class AddIncomeViewModel: ObservableObject {
         return !source.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
-    func loadTags() {
+    func loadTags() async {
         tags = dataService.tags
     }
 

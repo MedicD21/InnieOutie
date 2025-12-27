@@ -511,4 +511,77 @@ class DataService: ObservableObject {
             loadIncome(from: startOfMonth, to: endOfMonth)
         )
     }
+
+    /// Load all expenses (for reports)
+    func loadAllExpenses() -> [Expense] {
+        var result: [Expense] = []
+        let query = "SELECT * FROM expenses ORDER BY date DESC"
+        var statement: OpaquePointer?
+
+        if sqlite3_prepare_v2(db, query, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let amount = Decimal(sqlite3_column_double(statement, 1))
+                let dateInterval = sqlite3_column_double(statement, 2)
+                let categoryId = String(cString: sqlite3_column_text(statement, 3))
+                let noteText = sqlite3_column_text(statement, 4)
+                let note = noteText != nil ? String(cString: noteText!) : nil
+                let receiptPathText = sqlite3_column_text(statement, 5)
+                let receiptPath = receiptPathText != nil ? String(cString: receiptPathText!) : nil
+                let tagIdsText = sqlite3_column_text(statement, 6)
+                let tagIds = tagIdsText != nil ? String(cString: tagIdsText!).components(separatedBy: ",").filter { !$0.isEmpty } : []
+                let createdAtInterval = sqlite3_column_double(statement, 7)
+
+                let expense = Expense(
+                    id: id,
+                    amount: amount,
+                    date: Date(timeIntervalSince1970: dateInterval),
+                    categoryId: categoryId,
+                    note: note,
+                    receiptPath: receiptPath,
+                    tagIds: tagIds,
+                    createdAt: Date(timeIntervalSince1970: createdAtInterval)
+                )
+                result.append(expense)
+            }
+        }
+
+        sqlite3_finalize(statement)
+        return result
+    }
+
+    /// Load all income (for reports)
+    func loadAllIncome() -> [Income] {
+        var result: [Income] = []
+        let query = "SELECT * FROM income ORDER BY date DESC"
+        var statement: OpaquePointer?
+
+        if sqlite3_prepare_v2(db, query, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let amount = Decimal(sqlite3_column_double(statement, 1))
+                let dateInterval = sqlite3_column_double(statement, 2)
+                let source = String(cString: sqlite3_column_text(statement, 3))
+                let noteText = sqlite3_column_text(statement, 4)
+                let note = noteText != nil ? String(cString: noteText!) : nil
+                let tagIdsText = sqlite3_column_text(statement, 5)
+                let tagIds = tagIdsText != nil ? String(cString: tagIdsText!).components(separatedBy: ",").filter { !$0.isEmpty } : []
+                let createdAtInterval = sqlite3_column_double(statement, 6)
+
+                let income = Income(
+                    id: id,
+                    amount: amount,
+                    date: Date(timeIntervalSince1970: dateInterval),
+                    source: source,
+                    note: note,
+                    tagIds: tagIds,
+                    createdAt: Date(timeIntervalSince1970: createdAtInterval)
+                )
+                result.append(income)
+            }
+        }
+
+        sqlite3_finalize(statement)
+        return result
+    }
 }

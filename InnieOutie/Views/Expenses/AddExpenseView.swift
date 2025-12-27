@@ -15,6 +15,7 @@ struct AddExpenseView: View {
     @EnvironmentObject var paywallService: PaywallService
 
     @State private var showDeleteAlert = false
+    @State private var showAddCategory = false
     var onSave: (() -> Void)?
 
     init(expense: Expense? = nil, onSave: (() -> Void)? = nil) {
@@ -53,6 +54,15 @@ struct AddExpenseView: View {
                         ForEach(viewModel.categories) { category in
                             Label(category.name, systemImage: category.icon)
                                 .tag(category.id)
+                        }
+                    }
+
+                    Button(action: { showAddCategory = true }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.blue)
+                            Text("Add New Category")
+                                .foregroundColor(.blue)
                         }
                     }
 
@@ -175,6 +185,93 @@ struct AddExpenseView: View {
                 }
             } message: {
                 Text("Are you sure you want to delete this expense? This action cannot be undone.")
+            }
+            .sheet(isPresented: $showAddCategory) {
+                QuickAddCategorySheet(onCategoryAdded: {
+                    Task {
+                        await viewModel.loadCategories()
+                    }
+                })
+            }
+        }
+    }
+}
+
+// MARK: - Quick Add Category Sheet
+
+struct QuickAddCategorySheet: View {
+    @Environment(\.dismiss) var dismiss
+    @State private var categoryName = ""
+    @State private var selectedIcon = "tag.fill"
+    var onCategoryAdded: () -> Void
+
+    private let availableIcons = [
+        "tag.fill", "cart.fill", "house.fill", "car.fill",
+        "fork.knife", "cup.and.saucer.fill", "airplane",
+        "bag.fill", "creditcard.fill", "paperplane.fill",
+        "gift.fill", "heart.fill", "star.fill", "bolt.fill",
+        "wrench.fill"
+    ]
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextField("Category Name", text: $categoryName)
+                        .autocapitalization(.words)
+                } header: {
+                    Text("Name")
+                }
+
+                Section {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 50))], spacing: 12) {
+                        ForEach(availableIcons, id: \.self) { icon in
+                            Button(action: {
+                                selectedIcon = icon
+                            }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(selectedIcon == icon ? Color.blue.opacity(0.2) : Color(.systemGray6))
+                                        .frame(width: 50, height: 50)
+
+                                    Image(systemName: icon)
+                                        .font(.title3)
+                                        .foregroundColor(selectedIcon == icon ? .blue : .primary)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                } header: {
+                    Text("Icon")
+                }
+            }
+            .navigationTitle("New Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        let dataService = DataService()
+                        let category = Category(
+                            id: UUID().uuidString,
+                            name: categoryName.trimmingCharacters(in: .whitespaces),
+                            icon: selectedIcon,
+                            isDefault: false,
+                            sortOrder: 999
+                        )
+                        dataService.saveCategory(category)
+                        onCategoryAdded()
+                        dismiss()
+                    }
+                    .disabled(categoryName.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .fontWeight(.semibold)
+                }
             }
         }
     }

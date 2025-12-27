@@ -12,20 +12,34 @@ struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @EnvironmentObject var paywallService: PaywallService
     @State private var showTransactionsList = false
+    @State private var animate = false
+    @State private var phase: CGFloat = 0
 
     var body: some View {
         NavigationView {
             ZStack {
                 // Background gradient
                 LinearGradient(
-                    colors: [
-                        Color(.systemBackground),
-                        Color(.systemGray6).opacity(0.3)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+    colors: [
+        Color.red.opacity(0.3),
+        Color.green.opacity(0.3)
+    ],
+    startPoint: UnitPoint(
+        x: 0.5 + 0.4 * cos(phase),
+        y: 0.5 + 0.4 * sin(phase)
+    ),
+    endPoint: UnitPoint(
+        x: 0.5 - 0.4 * cos(phase),
+        y: 0.5 - 0.4 * sin(phase)
+    )
+)
+.ignoresSafeArea()
+.onAppear {
+    withAnimation(.linear(duration: 12).repeatForever(autoreverses: false)) {
+        phase = .pi * 2
+    }
+}
+
 
                 ScrollView {
                     VStack(spacing: 24) {
@@ -37,7 +51,7 @@ struct DashboardView: View {
                                 + Text("Outie")
                                     .foregroundColor(.red))
                                     .font(.system(size: 36, weight: .heavy))
-                                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                    .shadow(color: .white.opacity(0.1), radius: 2, x: 0, y: 1)
 
                                 Text("Finances Made Easy")
                                     .font(.subheadline.weight(.medium))

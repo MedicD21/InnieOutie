@@ -40,8 +40,12 @@ class AddExpenseViewModel: ObservableObject {
             }
         }
 
-        loadCategories()
-        loadTags()
+        // Load data after a short delay to ensure DataService has initialized
+        Task {
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            await loadCategories()
+            await loadTags()
+        }
     }
 
     var isEditMode: Bool {
@@ -55,16 +59,16 @@ class AddExpenseViewModel: ObservableObject {
         return !selectedCategoryId.isEmpty
     }
 
-    func loadCategories() {
+    func loadCategories() async {
         categories = dataService.categories
 
-        // Select first category by default
+        // Select first category by default if not in edit mode
         if selectedCategoryId.isEmpty, let firstCategory = categories.first {
             selectedCategoryId = firstCategory.id
         }
     }
 
-    func loadTags() {
+    func loadTags() async {
         tags = dataService.tags
     }
 

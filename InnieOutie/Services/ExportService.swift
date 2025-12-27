@@ -96,6 +96,239 @@ class ExportService {
         }
     }
 
+    // MARK: - Tax Export
+
+    /// Export year-to-date tax summary
+    /// Pro feature - IRS-friendly format for Schedule C filers
+    static func exportTaxSummaryCSV(
+        year: Int,
+        allExpenses: [Expense],
+        allIncome: [Income],
+        categories: [Category]
+    ) -> String {
+        var csv = ""
+
+        // Filter for the tax year
+        let calendar = Calendar.current
+        let yearExpenses = allExpenses.filter { calendar.component(.year, from: $0.date) == year }
+        let yearIncome = allIncome.filter { calendar.component(.year, from: $0.date) == year }
+
+        // Calculate totals
+        let totalIncome = yearIncome.reduce(Decimal(0)) { $0 + $1.amount }
+        let totalExpenses = yearExpenses.reduce(Decimal(0)) { $0 + $1.amount }
+        let netProfit = totalIncome - totalExpenses
+
+        // Header
+        csv += "InnieOutie Tax Summary\n"
+        csv += "Year: \(year)\n"
+        csv += "Generated: \(Date().formatted(date: .long, time: .standard))\n"
+        csv += "**For informational purposes only - consult a tax professional**\n"
+        csv += "\n"
+
+        // Summary
+        csv += "ANNUAL SUMMARY\n"
+        csv += "Total Income,\(totalIncome)\n"
+        csv += "Total Deductible Expenses,\(totalExpenses)\n"
+        csv += "Net Profit (Schedule C Line 31),\(netProfit)\n"
+        csv += "\n"
+
+        // Income by source
+        csv += "INCOME BY SOURCE\n"
+        csv += "Source,Total Amount,Number of Transactions\n"
+        let incomeBySource = Dictionary(grouping: yearIncome) { $0.source }
+        for (source, incomes) in incomeBySource.sorted(by: { $0.key < $1.key }) {
+            let total = incomes.reduce(Decimal(0)) { $0 + $1.amount }
+            csv += "\(source),\(total),\(incomes.count)\n"
+        }
+        csv += "\n"
+
+        // Expenses by category (Schedule C categories)
+        csv += "DEDUCTIBLE EXPENSES BY CATEGORY\n"
+        csv += "Category,Total Amount,Number of Transactions,Avg Amount\n"
+
+        let expensesByCategory = Dictionary(grouping: yearExpenses) { $0.categoryId }
+        for (categoryId, expenses) in expensesByCategory.sorted(by: { (kv1, kv2) in
+            let cat1 = categories.first(where: { $0.id == kv1.key })?.name ?? ""
+            let cat2 = categories.first(where: { $0.id == kv2.key })?.name ?? ""
+            return cat1 < cat2
+        }) {
+            let categoryName = categories.first(where: { $0.id == categoryId })?.name ?? "Unknown"
+            let total = expenses.reduce(Decimal(0)) { $0 + $1.amount }
+            let avg = total / Decimal(expenses.count)
+            csv += "\(categoryName),\(total),\(expenses.count),\(avg)\n"
+        }
+        csv += "\n"
+
+        // Monthly breakdown
+        csv += "MONTHLY BREAKDOWN\n"
+        csv += "Month,Income,Expenses,Net Profit\n"
+
+        for month in 1...12 {
+            let monthIncome = yearIncome.filter { calendar.component(.month, from: $0.date) == month }
+            let monthExpenses = yearExpenses.filter { calendar.component(.month, from: $0.date) == month }
+
+            let monthIncomeTotal = monthIncome.reduce(Decimal(0)) { $0 + $1.amount }
+            let monthExpensesTotal = monthExpenses.reduce(Decimal(0)) { $0 + $1.amount }
+            let monthNet = monthIncomeTotal - monthExpensesTotal
+
+            let monthName = calendar.monthSymbols[month - 1]
+            csv += "\(monthName),\(monthIncomeTotal),\(monthExpensesTotal),\(monthNet)\n"
+        }
+        csv += "\n"
+
+        // Detailed expense transactions
+        csv += "DETAILED EXPENSE TRANSACTIONS\n"
+        csv += "Date,Category,Amount,Note\n"
+        for expense in yearExpenses.sorted(by: { $0.date < $1.date }) {
+            let dateStr = expense.date.formatted(date: .numeric, time: .omitted)
+            let categoryName = categories.first(where: { $0.id == expense.categoryId })?.name ?? "Unknown"
+            let note = expense.note?.replacingOccurrences(of: ",", with: ";") ?? ""
+            csv += "\(dateStr),\(categoryName),\(expense.amount),\(note)\n"
+        }
+        csv += "\n"
+
+        // Detailed income transactions
+        csv += "DETAILED INCOME TRANSACTIONS\n"
+        csv += "Date,Source,Amount,Note\n"
+        for inc in yearIncome.sorted(by: { $0.date < $1.date }) {
+            let dateStr = inc.date.formatted(date: .numeric, time: .omitted)
+            let note = inc.note?.replacingOccurrences(of: ",", with: ";") ?? ""
+            csv += "\(dateStr),\(inc.source),\(inc.amount),\(note)\n"
+        }
+
+        return csv
+    }
+
+    /// Export transactions grouped by tag for project/client tracking
+    /// Perfect for freelancers tracking multiple projects or clients
+    static func exportByTag(
+        tag: Tag,
+        dateRange: ClosedRange<Date>,
+        allExpenses: [Expense],
+        allIncome: [Income],
+        categories: [Category]
+    ) -> String {
+        var csv = ""
+
+        // Header
+        csv += "PROJECT/CLIENT REPORT: \(tag.name.uppercased())\n"
+        csv += "Report Period: \(dateRange.lowerBound.formatted(date: .abbreviated, time: .omitted)) - \(dateRange.upperBound.formatted(date: .abbreviated, time: .omitted))\n"
+        csv += "Generated: \(Date().formatted(date: .long, time: .omitted))\n\n"
+
+        // Filter transactions for this tag and date range
+        let taggedExpenses = allExpenses.filter {
+            $0.tagIds.contains(tag.id) && dateRange.contains($0.date)
+        }
+        let taggedIncome = allIncome.filter {
+            $0.tagIds.contains(tag.id) && dateRange.contains($0.date)
+        }
+
+        // Calculate totals
+        let totalIncome = taggedIncome.reduce(Decimal(0)) { $0 + $1.amount }
+        let totalExpenses = taggedExpenses.reduce(Decimal(0)) { $0 + $1.amount }
+        let netProfit = totalIncome - totalExpenses
+        let profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0
+
+        // Summary
+        csv += "SUMMARY\n"
+        csv += "Total Income,\(totalIncome)\n"
+        csv += "Total Expenses,\(totalExpenses)\n"
+        csv += "Net Profit,\(netProfit)\n"
+        csv += "Profit Margin,\(String(format: "%.1f", NSDecimalNumber(decimal: profitMargin).doubleValue))%\n\n"
+
+        // Income breakdown by source
+        csv += "INCOME BY SOURCE\n"
+        csv += "Source,Amount,Count,Avg Amount\n"
+        let incomeBySource = Dictionary(grouping: taggedIncome) { $0.source }
+        for (source, incomes) in incomeBySource.sorted(by: { $0.key < $1.key }) {
+            let total = incomes.reduce(Decimal(0)) { $0 + $1.amount }
+            let avg = total / Decimal(incomes.count)
+            csv += "\(source),\(total),\(incomes.count),\(avg)\n"
+        }
+        csv += "\n"
+
+        // Expense breakdown by category
+        csv += "EXPENSES BY CATEGORY\n"
+        csv += "Category,Amount,Count,Avg Amount,% of Total\n"
+        let expensesByCategory = Dictionary(grouping: taggedExpenses) { $0.categoryId }
+        for (categoryId, expenses) in expensesByCategory.sorted(by: { (kv1, kv2) in
+            let cat1 = categories.first(where: { $0.id == kv1.key })?.name ?? ""
+            let cat2 = categories.first(where: { $0.id == kv2.key })?.name ?? ""
+            return cat1 < cat2
+        }) {
+            let categoryName = categories.first(where: { $0.id == categoryId })?.name ?? "Unknown"
+            let total = expenses.reduce(Decimal(0)) { $0 + $1.amount }
+            let avg = total / Decimal(expenses.count)
+            let percentage = totalExpenses > 0 ? (total / totalExpenses) * 100 : 0
+            csv += "\(categoryName),\(total),\(expenses.count),\(avg),\(String(format: "%.1f", NSDecimalNumber(decimal: percentage).doubleValue))%\n"
+        }
+        csv += "\n"
+
+        // Monthly breakdown
+        csv += "MONTHLY BREAKDOWN\n"
+        csv += "Month,Income,Expenses,Net Profit,Margin\n"
+
+        let calendar = Calendar.current
+        let allTransactionDates = (taggedExpenses.map { $0.date } + taggedIncome.map { $0.date })
+
+        if !allTransactionDates.isEmpty {
+            let monthsSet = Set(allTransactionDates.map {
+                calendar.dateComponents([.year, .month], from: $0)
+            })
+
+            let sortedMonths = monthsSet.sorted { (comp1, comp2) in
+                if comp1.year != comp2.year {
+                    return comp1.year ?? 0 < comp2.year ?? 0
+                }
+                return comp1.month ?? 0 < comp2.month ?? 0
+            }
+
+            for monthComp in sortedMonths {
+                guard let year = monthComp.year, let month = monthComp.month else { continue }
+
+                let monthExpenses = taggedExpenses.filter {
+                    let comp = calendar.dateComponents([.year, .month], from: $0.date)
+                    return comp.year == year && comp.month == month
+                }
+                let monthIncome = taggedIncome.filter {
+                    let comp = calendar.dateComponents([.year, .month], from: $0.date)
+                    return comp.year == year && comp.month == month
+                }
+
+                let income = monthIncome.reduce(Decimal(0)) { $0 + $1.amount }
+                let expenses = monthExpenses.reduce(Decimal(0)) { $0 + $1.amount }
+                let profit = income - expenses
+                let margin = income > 0 ? (profit / income) * 100 : 0
+
+                let monthName = DateFormatter().monthSymbols[month - 1]
+                csv += "\(monthName) \(year),\(income),\(expenses),\(profit),\(String(format: "%.1f", NSDecimalNumber(decimal: margin).doubleValue))%\n"
+            }
+        }
+        csv += "\n"
+
+        // Detailed income transactions
+        csv += "DETAILED INCOME TRANSACTIONS\n"
+        csv += "Date,Source,Amount,Note\n"
+        for inc in taggedIncome.sorted(by: { $0.date > $1.date }) {
+            let dateStr = inc.date.formatted(date: .abbreviated, time: .omitted)
+            let note = inc.note?.replacingOccurrences(of: ",", with: ";") ?? ""
+            csv += "\(dateStr),\(inc.source),\(inc.amount),\(note)\n"
+        }
+        csv += "\n"
+
+        // Detailed expense transactions
+        csv += "DETAILED EXPENSE TRANSACTIONS\n"
+        csv += "Date,Category,Amount,Note\n"
+        for exp in taggedExpenses.sorted(by: { $0.date > $1.date }) {
+            let dateStr = exp.date.formatted(date: .abbreviated, time: .omitted)
+            let categoryName = categories.first(where: { $0.id == exp.categoryId })?.name ?? "Unknown"
+            let note = exp.note?.replacingOccurrences(of: ",", with: ";") ?? ""
+            csv += "\(dateStr),\(categoryName),\(exp.amount),\(note)\n"
+        }
+
+        return csv
+    }
+
     // MARK: - PDF Export
 
     /// Export monthly data to PDF format
@@ -123,43 +356,73 @@ class ExportService {
 
             var yOffset: CGFloat = 40
 
-            // Gradient Header Bar
-            drawGradientHeader(rect: CGRect(x: 0, y: 0, width: 612, height: 100))
+            // Professional Header with clean white background
+            let headerRect = CGRect(x: 0, y: 0, width: 612, height: 120)
+            drawCleanHeader(rect: headerRect)
 
-            // Title with gradient effect (simulated with blue)
-            yOffset = 45
-            yOffset = drawText(
-                "InnieOutie",
-                at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 38, weight: .bold),
-                color: UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0)
-            )
+            // Logo
+            if let logo = UIImage(named: "splash") {
+                let logoSize: CGFloat = 80
+                let logoRect = CGRect(x: 50, y: 20, width: logoSize, height: logoSize)
+                logo.draw(in: logoRect)
 
-            yOffset = drawText(
-                "Finances Made Easy",
-                at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 13),
-                color: .white
-            )
+                // Company name and report title next to logo
+                yOffset = 30
+                yOffset = drawText(
+                    "InnieOutie",
+                    at: CGPoint(x: 145, y: yOffset),
+                    font: .systemFont(ofSize: 28, weight: .bold),
+                    color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
+                )
+
+                drawText(
+                    "Financial Report",
+                    at: CGPoint(x: 145, y: yOffset - 6),
+                    font: .systemFont(ofSize: 13, weight: .medium),
+                    color: UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+                )
+            } else {
+                // Fallback if logo not found
+                yOffset = 40
+                yOffset = drawText(
+                    "InnieOutie",
+                    at: CGPoint(x: 50, y: yOffset),
+                    font: .systemFont(ofSize: 32, weight: .bold),
+                    color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
+                )
+
+                drawText(
+                    "Financial Report",
+                    at: CGPoint(x: 50, y: yOffset - 6),
+                    font: .systemFont(ofSize: 14, weight: .medium),
+                    color: UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+                )
+            }
 
             // Date on the right side of header
             drawText(
                 Date().formatted(date: .long, time: .omitted),
-                at: CGPoint(x: 400, y: 55),
-                font: .systemFont(ofSize: 11),
-                color: .white
+                at: CGPoint(x: 430, y: 50),
+                font: .systemFont(ofSize: 10, weight: .medium),
+                color: UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
             )
 
-            yOffset = 120
+            yOffset = 135
 
-            // Month title with underline
+            // Month title with green accent (matching logo)
             yOffset = drawText(
                 snapshot.monthName.uppercased(),
                 at: CGPoint(x: 50, y: yOffset),
-                font: .systemFont(ofSize: 24, weight: .semibold),
-                color: .black
+                font: .systemFont(ofSize: 20, weight: .bold),
+                color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
             )
-            drawLine(from: CGPoint(x: 50, y: yOffset + 5), to: CGPoint(x: 250, y: yOffset + 5), color: UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0), width: 2)
+            // Green accent line (matching InnieOutie green)
+            drawLine(
+                from: CGPoint(x: 50, y: yOffset + 2),
+                to: CGPoint(x: 200, y: yOffset + 2),
+                color: UIColor(red: 0.0, green: 0.7, blue: 0.3, alpha: 1.0),
+                width: 3
+            )
 
             yOffset += 25
 
@@ -214,24 +477,38 @@ class ExportService {
                     let percentage = snapshot.totalExpenses > 0 ?
                         Double(truncating: (amount / snapshot.totalExpenses * 100) as NSNumber) : 0
 
-                    let bgColor = index % 2 == 0 ? UIColor.systemGray6 : UIColor.white
-                    let rowRect = CGRect(x: 50, y: yOffset - 5, width: 512, height: 28)
+                    // Professional alternating row colors
+                    let bgColor = index % 2 == 0 ? UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1.0) : UIColor.white
+                    let rowRect = CGRect(x: 50, y: yOffset - 4, width: 512, height: 30)
                     drawBox(rect: rowRect, fillColor: bgColor, borderColor: .clear)
 
+                    // Category name
                     yOffset = drawText(
                         category.name,
-                        at: CGPoint(x: 65, y: yOffset),
-                        font: .systemFont(ofSize: 13)
+                        at: CGPoint(x: 60, y: yOffset + 2),
+                        font: .systemFont(ofSize: 12),
+                        color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
                     )
 
-                    let amountText = "\(amount.formatted(.currency(code: "USD")))  (\(String(format: "%.0f%%", percentage)))"
+                    // Amount and percentage aligned to right
+                    let amountText = "\(amount.formatted(.currency(code: "USD")))"
+                    let percentText = "(\(String(format: "%.0f%%", percentage)))"
+
                     drawText(
                         amountText,
-                        at: CGPoint(x: 410, y: yOffset - 13),
-                        font: .systemFont(ofSize: 13, weight: .medium)
+                        at: CGPoint(x: 430, y: yOffset - 16),
+                        font: .systemFont(ofSize: 12, weight: .semibold),
+                        color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
                     )
 
-                    yOffset += 8
+                    drawText(
+                        percentText,
+                        at: CGPoint(x: 520, y: yOffset - 16),
+                        font: .systemFont(ofSize: 11),
+                        color: UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+                    )
+
+                    yOffset += 12
                 }
 
                 yOffset += 20
@@ -250,35 +527,54 @@ class ExportService {
                     let percentage = snapshot.totalIncome > 0 ?
                         Double(truncating: (amount / snapshot.totalIncome * 100) as NSNumber) : 0
 
-                    let bgColor = index % 2 == 0 ? UIColor.systemGray6 : UIColor.white
-                    let rowRect = CGRect(x: 50, y: yOffset - 5, width: 512, height: 28)
+                    // Professional alternating row colors
+                    let bgColor = index % 2 == 0 ? UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1.0) : UIColor.white
+                    let rowRect = CGRect(x: 50, y: yOffset - 4, width: 512, height: 30)
                     drawBox(rect: rowRect, fillColor: bgColor, borderColor: .clear)
 
+                    // Source name
                     yOffset = drawText(
                         source,
-                        at: CGPoint(x: 65, y: yOffset),
-                        font: .systemFont(ofSize: 13)
+                        at: CGPoint(x: 60, y: yOffset + 2),
+                        font: .systemFont(ofSize: 12),
+                        color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
                     )
 
-                    let amountText = "\(amount.formatted(.currency(code: "USD")))  (\(String(format: "%.0f%%", percentage)))"
+                    // Amount and percentage aligned to right
+                    let amountText = "\(amount.formatted(.currency(code: "USD")))"
+                    let percentText = "(\(String(format: "%.0f%%", percentage)))"
+
                     drawText(
                         amountText,
-                        at: CGPoint(x: 410, y: yOffset - 13),
-                        font: .systemFont(ofSize: 13, weight: .medium)
+                        at: CGPoint(x: 430, y: yOffset - 16),
+                        font: .systemFont(ofSize: 12, weight: .semibold),
+                        color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
                     )
 
-                    yOffset += 8
+                    drawText(
+                        percentText,
+                        at: CGPoint(x: 520, y: yOffset - 16),
+                        font: .systemFont(ofSize: 11),
+                        color: UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+                    )
+
+                    yOffset += 12
                 }
             }
 
-            // Footer
+            // Footer with green accent
             let footerY: CGFloat = 760
-            drawLine(from: CGPoint(x: 50, y: footerY - 10), to: CGPoint(x: 562, y: footerY - 10), color: .lightGray, width: 1)
+            drawLine(
+                from: CGPoint(x: 50, y: footerY - 10),
+                to: CGPoint(x: 562, y: footerY - 10),
+                color: UIColor(red: 0.0, green: 0.7, blue: 0.3, alpha: 0.15),
+                width: 1
+            )
             drawText(
                 "Generated by InnieOutie  |  \(Date().formatted(date: .abbreviated, time: .shortened))",
                 at: CGPoint(x: 50, y: footerY),
                 font: .systemFont(ofSize: 9),
-                color: .gray
+                color: UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
             )
         }
 
@@ -344,28 +640,19 @@ class ExportService {
         context?.strokePath()
     }
 
-    private static func drawGradientHeader(rect: CGRect) {
+    private static func drawCleanHeader(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
 
-        // Create a gradient from blue to purple
-        let colors = [
-            UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0).cgColor,
-            UIColor(red: 0.5, green: 0.3, blue: 0.8, alpha: 1.0).cgColor
-        ] as CFArray
+        // Clean white background
+        context?.setFillColor(UIColor.white.cgColor)
+        context?.fill(rect)
 
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: [0.0, 1.0])!
-
-        context?.saveGState()
-        context?.addRect(rect)
-        context?.clip()
-        context?.drawLinearGradient(
-            gradient,
-            start: CGPoint(x: rect.minX, y: rect.minY),
-            end: CGPoint(x: rect.maxX, y: rect.minY),
-            options: []
-        )
-        context?.restoreGState()
+        // Subtle bottom border in green
+        context?.setStrokeColor(UIColor(red: 0.0, green: 0.7, blue: 0.3, alpha: 0.2).cgColor)
+        context?.setLineWidth(2)
+        context?.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+        context?.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        context?.strokePath()
     }
 
     private static func drawCard(rect: CGRect, title: String, value: String, color: UIColor, isPositive: Bool, isPrimary: Bool = false) {
@@ -405,33 +692,50 @@ class ExportService {
 
     @discardableResult
     private static func drawSectionHeader(title: String, at yOffset: CGFloat) -> CGFloat {
+        // Clean section header with green accent
+        let headerRect = CGRect(x: 50, y: yOffset - 8, width: 512, height: 32)
+
+        // White background
         drawBox(
-            rect: CGRect(x: 50, y: yOffset - 8, width: 512, height: 32),
-            fillColor: UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0),
+            rect: headerRect,
+            fillColor: UIColor.white,
             borderColor: .clear
         )
 
+        // Green accent line at left edge
+        let context = UIGraphicsGetCurrentContext()
+        context?.setFillColor(UIColor(red: 0.0, green: 0.7, blue: 0.3, alpha: 1.0).cgColor)
+        context?.fill(CGRect(x: 50, y: yOffset - 8, width: 4, height: 32))
+
+        // Bottom border
+        context?.setStrokeColor(UIColor(red: 0.0, green: 0.7, blue: 0.3, alpha: 0.15).cgColor)
+        context?.setLineWidth(1)
+        context?.move(to: CGPoint(x: 50, y: headerRect.maxY))
+        context?.addLine(to: CGPoint(x: 562, y: headerRect.maxY))
+        context?.strokePath()
+
         return drawText(
             title,
-            at: CGPoint(x: 60, y: yOffset),
-            font: .systemFont(ofSize: 16, weight: .semibold),
-            color: UIColor(red: 0.2, green: 0.4, blue: 0.9, alpha: 1.0)
+            at: CGPoint(x: 64, y: yOffset),
+            font: .systemFont(ofSize: 15, weight: .semibold),
+            color: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
         )
     }
 
     private static func drawTableHeader(at yOffset: CGFloat, leftText: String, rightText: String) {
+        // Professional table headers with better spacing
         drawText(
             leftText.uppercased(),
-            at: CGPoint(x: 65, y: yOffset),
-            font: .systemFont(ofSize: 10, weight: .semibold),
-            color: .gray
+            at: CGPoint(x: 60, y: yOffset),
+            font: .systemFont(ofSize: 9, weight: .bold),
+            color: UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
         )
 
         drawText(
             rightText.uppercased(),
-            at: CGPoint(x: 410, y: yOffset),
-            font: .systemFont(ofSize: 10, weight: .semibold),
-            color: .gray
+            at: CGPoint(x: 430, y: yOffset),
+            font: .systemFont(ofSize: 9, weight: .bold),
+            color: UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
         )
     }
 }

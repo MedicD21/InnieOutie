@@ -40,7 +40,7 @@ struct ProfitCardView: View {
                 )
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
-                .shadow(color: (snapshot.isProfit ? Color.green : Color.red).opacity(0.3), radius: 8, x: 0, y: 4)
+                .shadow(color: (snapshot.isProfit ? Color.green : Color.red).opacity(0.4), radius: 5, x: 0, y: 4)
 
             // Profit margin
             if snapshot.totalIncome > 0 {
@@ -118,7 +118,7 @@ struct ProfitCardView: View {
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                (snapshot.isProfit ? Color.green : Color.red).opacity(0.3),
+                                (snapshot.isProfit ? Color.green : Color.red).opacity(0.5),
                                 (snapshot.isProfit ? Color.green : Color.red).opacity(0.1)
                             ],
                             startPoint: .topLeading,
